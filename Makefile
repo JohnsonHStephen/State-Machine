@@ -12,7 +12,7 @@ OUTFILE = main.exe
 
 All: $(OBJS)
 	$(CC) $(SDL_FLAGS) -o $(OUTFILE) $(OBJS)
-	#(document)clear_o
+	$(document)clear_o
 
 main.o: main.cpp
 	$(CC) -c main.cpp
