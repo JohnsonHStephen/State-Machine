@@ -2,26 +2,26 @@ CC = g++
 
 OBJS = main.o app.o
 OBJ_FOLDER = src/
-HEADER_FOLDER = src/header/
+HEADER_FOLDER = src/headers/
 
-SDL_FLAGS = -ID:\Programs\MinGW\SDL2_mingw_32\include -LD:\Programs\MinGW\SDL2_mingw_32\lib -lSDL2main -lSDL2
+SDL_FLAGS = -ID:\Programs\MinGW\SDL2_mingw_32\include\SDL2 -LD:\Programs\MinGW\SDL2_mingw_32\lib -lmingw32 -lSDL2main -lSDL2
 
-HEADER_INCLUDES = -I./src/header
+HEADER_INCLUDES = -I./src/headers
 
 OUTFILE = main.exe
 
 All: $(OBJS)
-	$(CC) $(SDL_FLAGS) -o $(OUTFILE) $(OBJS)
-	$(document)clear_o
+	$(CC) -o $(OUTFILE) $(OBJS) $(SDL_FLAGS)
+	$(MAKE) clean_o
 
-main.o: main.cpp
-	$(CC) -c main.cpp
+main.o: $(OBJ_FOLDER)main.cpp
+	$(CC) -c $(OBJ_FOLDER)main.cpp
 
-app.o: app.cpp app.h
-	$(CC) $(HEADER_INCLUDES) $(SDL_FLAGS) -c app.cpp
+app.o: $(OBJ_FOLDER)app.cpp $(HEADER_FOLDER)app.h
+	$(CC) $(HEADER_INCLUDES) -c $(OBJ_FOLDER)app.cpp $(SDL_FLAGS)
 
-clear: clear_o
+clean: clean_o
 	del /f *.exe
 
-clear_o:
+clean_o:
 	del /f *.o
