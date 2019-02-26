@@ -1,88 +1,133 @@
-#include <iostream>
+#include <string>
 
 #include "app.h"
 #include "state.h"
 
 App::App() {
+  init("No Title");
+}
+
+App::App(const char* title) {
+  init(title);
+}
+
+App::App(const char* title, int width, int height, Uint32 flags) {
+  init(title, width, height, flags);
 }
 
 App::~App() {
-    cleanup();
+  cleanup();
 }
 
 int App::init(const char* title, int width, int height, Uint32 flags) {
-    SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_EVERYTHING);
 
-    window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
+  window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 
-    if(window == NULL) {
-        std::cout << "Error creating window: " << SDL_GetError() << std::endl;
-        return 1;
-    }
+  if(window == NULL) {
+    strStream << "Error creating window: " << SDL_GetError();
+    view.printToFile(strStream.str());
+    strStream.str(std::string());
 
-    return 0;
+    return 1;
+  }
+
+  running = true;
+
+  return 0;
 }
 
 int App::cleanup() {
-    SDL_DestroyWindow(window);
+  while(!states.empty()) {
+    popState();
+  }
 
-    if(window != NULL) {
-        std::cout << "Error deleting window: " << SDL_GetError() << std::endl;
-        return 1;
-    }
+  SDL_DestroyWindow(window);
 
-    SDL_Quit;
-    return 0;
+  if(window == NULL) {
+    strStream << "Error deleting window: " << SDL_GetError();
+    view.printToFile(strStream.str());
+    strStream.str(std::string());
+
+    return 1;
+  }
+
+  SDL_Quit;
+  return 0;
 }
 
 int App::changeState(State* state) {
-    if(!states.empty()) {
-        if(states.back()->cleanup()) {
-            return 1;
-        }
-        states.pop_back();
+  if(!states.empty()) {
+    if(states.back()->cleanup()) {
+      return 1;
     }
+    states.pop_back();
+  }
 
-    states.push_back(state);
-    return states.back()->init();
+  states.push_back(state);
+  return states.back()->init(this);
 }
 
 int App::pushState(State* state) {
-    if(!states.empty()) {
-        if(states.back()->pause()) {
-            return 1;
-        }
+  if(!states.empty()) {
+    if(states.back()->pause()) {
+      return 1;
     }
+  }
 
-    states.push_back(state);
-    return states.back()->init();
+  states.push_back(state);
+  return states.back()->init(this);
 }
 
 int App::popState() {
-    if(!states.empty()) {
-        if(states.back()->cleanup()) {
-            return 1;
-        }
-        states.pop_back();
+  if(!states.empty()) {
+    if(states.back()->cleanup()) {
+      return 1;
     }
+    states.pop_back();
+  }
 
-    if(!states.empty()) {
-        if(states.back()->resume()) {
-            return 1;
-        }
+  if(!states.empty()) {
+    if(states.back()->resume()) {
+      return 1;
     }
+  }
 
-    return 0;
+  return 0;
 }
 
 int App::handleEvents() {
+  // strStream << "In event handling";
+  // view.printToFile(strStream.str());
+  // strStream.str(std::string());
+
+  if(states.empty()) {
+    return 1;
+  }
+
   return states.back()->handleEvents(this);
 }
 
 int App::update() {
+  // strStream << "In updating";
+  // view.printToFile(strStream.str());
+  // strStream.str(std::string());
+
+  if(states.empty()) {
+    return 1;
+  }
+
   return states.back()->update(this);
 }
 
-int App::draw() {
-  return states.back()->draw(this);
+int App::draw(Uint32 timeBetweenFrames) {
+  // strStream << "In drawing";
+  // view.printToFile(strStream.str());
+  // strStream.str(std::string());
+
+  if(states.empty()) {
+    return 1;
+  }
+
+  return states.back()->draw(timeBetweenFrames);
 }

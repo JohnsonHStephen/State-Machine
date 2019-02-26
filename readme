@@ -1,3 +1,3 @@
 Created By: Stephen Johnson
 
-This is a basic C++ game based on an old flash game I played as a kid (if you know of the game please link it to me). This game has you as a stationary turret firing ammunition at large falling balls of red, trying to stop them from destroying the ground. The idea is to account simple gravity and inertial physics.
+This is a simple finite state machine engine using a varying framerate for constant tick-rate.
